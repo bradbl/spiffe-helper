@@ -78,6 +78,9 @@ func (s *sidecar) RunDaemon(ctx context.Context) error {
 		select {
 		case svidResponse := <-updateChan:
 			updateCertificates(s, svidResponse)
+			if strings.ToLower(s.config.ExitOnCmdFinish) == "true" && s.processRunning == 0 {
+				return nil
+			}
 		case <-interrupt:
 			return nil
 		case err := <-errorChan:
@@ -203,7 +206,7 @@ func (s *sidecar) writeCerts(file string, data []byte) error {
 // formats as PEM, and writes it to file
 func (s *sidecar) writeKey(file string, data []byte) error {
 	b := &pem.Block{
-		Type:  "EC PRIVATE KEY",
+		Type:  "PRIVATE KEY",
 		Bytes: data,
 	}
 
